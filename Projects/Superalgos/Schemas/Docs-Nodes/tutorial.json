@@ -1,7 +1,8 @@
 {
     "type": "Tutorial",
     "definition": {
-        "text": "The tutorial hierarchy features a free arrangement of tutorial topic and tutorial step nodes that make up a tutorial. Each node in the hierarchy, including the parent tutorial node, represents a HTML page that is overlaid on top of both the design space and the charting space. "
+        "text": "The tutorial hierarchy features a free arrangement of Tutorial Topic and Tutorial Step nodes that make up a tutorial. Each node in the hierarchy, including the parent tutorial node, represents an HTML page that may be overlaid on top of both the Design Space and the Charting Space.",
+        "updated": 1617610222444
     },
     "paragraphs": [
         {
@@ -10,7 +11,23 @@
         },
         {
             "style": "Text",
-            "text": "Nodes in the hierarchy may be arranged freely, meaning that there may be as many tutorial topics and tutorial steps as desired. In general terms, all types of nodes behave similarly in the sense that each node, independently of the precise type, represents a tutorial step in and of itself. There are subtle differences to be covered where appropriate."
+            "text": "Nodes in the hierarchy may be arranged freely, meaning that there may be as many tutorial topics and tutorial steps as desired. Tutorial topics may contain tutorial steps but also other tutorial topics. This allows nesting topics to be used as subtopics.",
+            "updated": 1617649482153
+        },
+        {
+            "style": "Text",
+            "text": "The system – as usual – evaluates the hierarchy in a clockwise direction starting from the node to the right of the parent Tutorial node, and goes to the deepest node of each branch before moving to the next one.",
+            "updated": 1617649522223
+        },
+        {
+            "style": "Callout",
+            "text": "In general terms, all types of nodes behave similarly in the sense that each node, independently of the precise type, represents a tutorial step in and of itself. That is, all nodes including the top-level Tutorial node, the Tutorial Topic node, and the Tutorial Step node may display a content page as a step in the tutorial. Subtle differences shall be pointed where appropriate.",
+            "updated": 1617622995279
+        },
+        {
+            "style": "Note",
+            "text": "The key similarity among all types of nodes in the hierarchy is that all of them may draw content from the tutorial's collection of pages in the Docs. That is, each node in the hierarchy points to a Docs Page, and it is that page in the Docs that features the content displayed for the given step. The pointer is specified in the configuration of each node (see the docs property).",
+            "updated": 1617623101039
         },
         {
             "style": "Block",
@@ -23,124 +40,256 @@
         },
         {
             "style": "Text",
-            "text": "The configuration of each node in the tutorial hierarchy determines the content of each step. All types of nodes share the same basic configuration. However, tutorial step nodes have extra properties, described elsewhere."
+            "text": "The configuration of each node in the tutorial hierarchy determines the content and behavior of each step. All types of nodes share the same basic configuration. However, Tutorial Step nodes have extra properties, described on the Tutorial Step node page.",
+            "updated": 1617623609988
+        },
+        {
+            "style": "Success",
+            "text": "The configuration properties discussed on this page apply to all types of nodes in the hierarchy.",
+            "updated": 1617623631110
         },
         {
             "style": "Text",
-            "text": "The layout of the HTML page is fixed (CSS styles are fixed too) and is made out of a sequence of HTML elements, each of which may or may not be used, depending on whether the corresponding configuration parameter exists or not in the configuration."
+            "text": "The layout of the HTML page follows the layout of the associated page in the Docs, although displayed within the confines of the tutorial window.",
+            "updated": 1617610416865
         },
         {
             "style": "Callout",
-            "text": "In other words, you may choose which elements of a potentially long list are used by filling the corresponding parameters with content or not."
+            "text": "In other words, you affect the layout of the particular step by writing content and applying styles to individual paragraphs in the associated Docs Page.",
+            "updated": 1617610435932
         },
         {
             "style": "Note",
-            "text": "The HTML page features a limited space and does not support scrolling. If too much information is defined in the configuration, the resulting content overflows the available space. There is no system-side control to deal with such overflows, so it's up to you to spread information across multiple steps and keep each page within its limits."
+            "text": "The HTML page features a limited space and does not support scrolling. If too much information is defined in the associated Docs Page, the resulting content overflows the available space in the tutorial window. There is no system-side control to deal with such overflows, so it's up to you to spread information across multiple steps and keep each page within its limits.",
+            "updated": 1613839536547
         },
         {
-            "style": "Success",
-            "text": "You may use HTML element tags and inline CSS as part of the content of parameters. Just consider that they shall be embedded in the fixed layout and their effectiveness may vary.",
-            "updated": 1609704857821
-        },
-        {
-            "style": "Success",
-            "text": "Configuration items are listed in the order of appearance in the HTML layout, that is, the sequence of HTML elements mentioned earlier.",
-            "updated": 1609704957111
+            "style": "Title",
+            "text": "Configuration Properties",
+            "updated": 1617635291377
         },
         {
             "style": "Subtitle",
-            "text": "Properties",
-            "updated": 1609705050135
+            "text": "icon",
+            "updated": 1617635214170
+        },
+        {
+            "style": "Text",
+            "text": "The property icon requires two definitions:",
+            "updated": 1617635366207
         },
         {
             "style": "List",
-            "text": "title is the main title of the page."
+            "text": "The \"name\" of the icon without the extension; "
         },
         {
             "style": "List",
-            "text": "summary is a block of text preceded with the word <i>Summary</i>."
+            "text": "The \"project\" the icon belongs to."
         },
         {
-            "style": "List",
-            "text": "subTitle is the secondary title of the page.",
-            "updated": 1609705068885
+            "style": "Text",
+            "text": "For your reference, icons are stored in the following path:"
         },
         {
-            "style": "List",
-            "text": "gif is the name of an image in the <i>GIF</i> format. Do not include the .gif extension in the configuration, and make sure that the name of the file features the extension in lowercase. The file must be stored in the \\Projects\\[Project-Name]\\Gifsfolder. The optimum size of the image is 400 px in width. For a step showing only a gif image, use 580 px for the height."
+            "style": "Json",
+            "text": "\\Projects\\[Project-Name]\\Icons",
+            "updated": 1617610685030
         },
         {
-            "style": "List",
-            "text": "image is the name of one of the icons stored in the \\Projects\\[Project-Name]\\Iconsfolder, without the extension. When the configuration exists, the icon is placed within a table, on the left-hand side of the text block featured in the definition field. When there is no icon, the definition occupies the full width."
+            "style": "Success",
+            "text": "Use the existing collection of icons to illustrate each step of the tutorial. These illustrations help make for more compelling communication.",
+            "updated": 1617623866873
         },
         {
-            "style": "List",
-            "text": "definition is a block of text in bold style.",
-            "updated": 1609705317162
+            "style": "Text",
+            "text": "When the configuration exists, the icon is placed within a table, side by side with the text block that makes up the definition field of the associated Docs Page. When there is no icon, the definition occupies the full width of the page.",
+            "updated": 1617635415677
         },
         {
-            "style": "List",
-            "text": "bulletListIntro is a block of text that serves as an introduction to the array of bullet points below."
+            "style": "Json",
+            "text": "\"icon\": {\n        \"name\": \"balance\",\n        \"project\": \"Superalgos\"\n    }",
+            "updated": 1613840669552
         },
         {
-            "style": "List",
-            "text": "bulletArray is the definition of any number of bullet points. The first field on each bullet is rendered in bold style and the second, in plain style. If the fields are left empty, the bullet list will still be included in the HTML, therefore, if you don't want bullets you must delete the whole definition of the bullet array from the configuration."
+            "style": "Text",
+            "text": "The above configuration places the balance.png icon of the Superalgos project in the table of the corresponding Docs page (see the docs property below).",
+            "updated": 1617635461827
         },
         {
-            "style": "List",
-            "text": "paragraph1 is a regular block of text."
+            "style": "Subtitle",
+            "text": "position",
+            "updated": 1617635475423
         },
         {
-            "style": "List",
-            "text": "callOut is a block of text in bold style with a green border and the left-hand side of the block."
+            "style": "Text",
+            "text": "The position property determines the position of the floating HTML. There are three alternatives... \"Left\", \"Right\", or leave the field empty to position the page on the center of the screen.",
+            "updated": 1617635484212
         },
         {
-            "style": "List",
-            "text": "externalLink allows you to set up a link that opens in a new tab at the end of the callOut block. Enter the URL in the first field and the anchor text in the second. You may also use HTML to include links anywhere else.",
-            "updated": 1609705400186
+            "style": "Json",
+            "text": "    \"position\": \"Left\"",
+            "updated": 1613840787300
         },
         {
-            "style": "List",
-            "text": "paragraph2 is a regular block of text."
+            "style": "Text",
+            "text": "The configuration above places the tutorial step on the left-hand side of the screen.",
+            "updated": 1617635642707
         },
         {
-            "style": "List",
-            "text": "note is a block of text within a blue box preceded with the string Note.",
-            "updated": 1609705469745
+            "style": "Subtitle",
+            "text": "slider",
+            "updated": 1617635668767
         },
         {
-            "style": "List",
-            "text": "tip is a block of text within a green box preceded with the string Tip.",
-            "updated": 1609705475148
+            "style": "Text",
+            "text": "The slider property determines the position of the horizontal slider. There are three alternatives... \"toTop\", \"toBottom\", \"toMiddle\"."
         },
         {
-            "style": "List",
-            "text": "important is a block of text within a yellow box preceded with the string Important.",
-            "updated": 1609705484520
+            "style": "Json",
+            "text": "\"slider\": \"toBottom\" // Opens the Charting Space",
+            "updated": 1617624084984
         },
         {
-            "style": "List",
-            "text": "warning is a block of text within a red box preceded with the string Warning.",
-            "updated": 1609705492685
+            "style": "Json",
+            "text": "\"slider\": \"toTop\" // Opens the Design Space",
+            "updated": 1617624125599
         },
         {
-            "style": "List",
-            "text": "position determines the position of the floating HTML. There are three alternatives... Left, Right, or leave the field empty to position the page in the center of the screen.",
-            "updated": 1609705546655
+            "style": "Json",
+            "text": "\"slider\": \"toMiddle\" // Enables using the Charting Space and the Design Space concurrently",
+            "updated": 1617624154127
         },
         {
-            "style": "List",
-            "text": "slider determines the position of the horizontal slider. There are four alternatives... toTop, Right, or leave the field empty to position the page in the center of the screen.",
-            "updated": 1609705629835
+            "style": "Subtitle",
+            "text": "pressButton",
+            "updated": 1617635952027
         },
         {
-            "style": "List",
-            "text": "pressButton allows you to forcefully Stop the tutorial, go to the Next step, go to the Previous step, or Skip a step. When a step is loaded and one of these options is configured in this field, the action is applied immediately."
+            "style": "Text",
+            "text": "The pressButton property allows you to forcefully \"Stop\" the tutorial, go to the \"Next\" step, go to the \"Previous\" step, or \"Skip\" a step. When a step is loaded and one of these options is configured in this property, the action is applied immediately."
         },
         {
-            "style": "List",
-            "text": "documentationURL: opens the Superalgos Documentation in the URL you configure. Use the complete URL, including the https:// protocol header.",
-            "updated": 1609705696017
+            "style": "Note",
+            "text": "A common use of this feature is to skip a step, for instance, a Tutorial Topic node that is used solely for organizational purposes within the hierarchy, thus features no content. Leave the field empty for the step to play in the usual fashion.",
+            "updated": 1617649582774
+        },
+        {
+            "style": "Json",
+            "text": "\"pressButton\": \"Next\"",
+            "updated": 1613841332185
+        },
+        {
+            "style": "Text",
+            "text": "The above configuration takes the user to the next step in the tutorial without displaying any content for the node in question.",
+            "updated": 1617648136262
+        },
+        {
+            "style": "Success",
+            "text": "You may use Tutorial Topic nodes for organizational purposes only, for instance, to arrange the hierarchy in a way that it's easy to read and maintain. Topics with too many steps are harder to deal with later on. In other words, you may use a Tutorial Topic node to group several steps, even if you don't intend the Tutorial Topic node to display any content. In such cases, you may use this property to skip the step that is not intended for content display.",
+            "updated": 1617649616576
+        },
+        {
+            "style": "Subtitle",
+            "text": "docs",
+            "updated": 1617636114812
+        },
+        {
+            "style": "Text",
+            "text": "The docs property is used to point to the Docs Tutorial Page that feeds content to the particular tutorial step. The definition requires the name of the Project, the Docs Page Category which is always \"Tutorial\", and the complete name of the Docs Page, that is, the \"type\" as specified in the JSON file.",
+            "updated": 1617648211414
+        },
+        {
+            "style": "Json",
+            "text": "\"docs\": {\n        \"project\": \"Superalgos\",\n        \"category\": \"Tutorial\",\n        \"type\": \"Tutorial Step - Scales' Best-Kept Secrets\"\n    }",
+            "updated": 1613842164831
+        },
+        {
+            "style": "Subtitle",
+            "text": "controlDocs",
+            "updated": 1617648219190
+        },
+        {
+            "style": "Text",
+            "text": "The property is used to control the behavior of the Docs panel. Within controlDocs, several properties are available, and all of them are optional. Let's review each in detail."
+        },
+        {
+            "style": "Text",
+            "text": "The panel property may be set to \"Open\" or \"Close\". This property controls the tab that allows you to open the Docs Panel in one step, and close it on a different step when it's no longer needed.",
+            "updated": 1617649653900
+        },
+        {
+            "style": "Json",
+            "text": "\"controlDocs\": {\n        \"panel\": \"Open\",\n        }",
+            "updated": 1617634451884
+        },
+        {
+            "style": "Text",
+            "text": ""
+        },
+        {
+            "style": "Success",
+            "text": "If the Docs Panel is closed, the rest of the properties are somehow irrelevant. However, when the Docs Panel is open, the rest of the properties control what is displayed in the Docs Panel.",
+            "updated": 1617635061507
+        },
+        {
+            "style": "Text",
+            "text": "The property closeTutorialEditor may switch on and off the Docs editor. When set to false or when there is no definition, and provided no specific Docs Page is called (see controlDocs below), the Docs panel shows the page associated with the current tutorial step in editing mode.",
+            "updated": 1617649781891
+        },
+        {
+            "style": "Json",
+            "text": "\"controlDocs\": {\n        \"panel\": \"Open\",\n        \"closeTutorialEditor\": false,\n        }",
+            "updated": 1617648310737
+        },
+        {
+            "style": "Success",
+            "text": "Because this definition is set to false by default, this is the usual behavior. That is, by default, when the Docs Panel is opened while a tutorial step is playing, the Docs Panel shows the Docs Page associated with the specific step so that the page may be edited right then and there.",
+            "updated": 1617648335347
+        },
+        {
+            "style": "Text",
+            "text": "When the closeTutorialEditor property is set to true and there is no request to open a Docs page (see page property below), then the Docs panel shows whatever Docs Page was being displayed in the previous step.",
+            "updated": 1617648434580
+        },
+        {
+            "style": "Json",
+            "text": "\"controlDocs\": {\n        \"panel\": \"Open\",\n        \"closeTutorialEditor\": true,\n        }",
+            "updated": 1617634444688
+        },
+        {
+            "style": "Success",
+            "text": "You may want to close the tutorial editor when the user is supposed to interact with the Docs from one step to the next. For example, let's say the tutorial instructs the user to run a search and discusses the search results in the following step. In that case, you will want the tutorial editor to remain closed, as otherwise, the search performed by the user would be lost, and instead the page corresponding to the new tutorial step would be loaded.",
+            "updated": 1617649832578
+        },
+        {
+            "style": "Text",
+            "text": "The searchPage property overruns the tutorial editor settings and loads the home search page featuring the search box in the center.",
+            "updated": 1617649861459
+        },
+        {
+            "style": "Json",
+            "text": "\"controlDocs\": {\n        \"panel\": \"Open\",\n        \"searchPage\": true,\n        }",
+            "updated": 1617648855034
+        },
+        {
+            "style": "Success",
+            "text": "Use the above setting when you wish the user to get the clean search box to make a search or run a command.",
+            "updated": 1617648884933
+        },
+        {
+            "style": "Text",
+            "text": "The page property is where you define which Docs Page must be loaded. You must specify the Project, the Docs Page Category, and the \"type\" which is the complete name of the page. The optional property anchor allows you to points the user to a specific paragraph in the page with the Docs Anchor Style.",
+            "updated": 1617649332425
+        },
+        {
+            "style": "Json",
+            "text": "\"controlDocs\": {\n        \"panel\": \"Open\",\n        \"page\": {\n            \"project\": \"Superalgos\",\n            \"category\": \"Topic\",\n            \"type\": \"Syntax Overview\",\n            \"anchor\": \"Previous Property\"\n            }\n         }",
+            "updated": 1617649170254
+        },
+        {
+            "style": "Success",
+            "text": "Use the above configuration when you wish the user to read a specific page in the Docs.",
+            "updated": 1617649085529
         }
     ]
 }

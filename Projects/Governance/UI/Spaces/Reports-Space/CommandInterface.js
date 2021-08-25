@@ -27,17 +27,23 @@ function newGovernanceReportsCommmandInterface() {
         if (checkPayCommand() === undefined) { return true }
 
         function checkPRsCommand() {
-            if (UI.projects.governance.spaces.reportsSpace.commandInterface.command.toLowerCase() === 'gov.help gov.prs') {
+
+            let command = UI.projects.governance.spaces.reportsSpace.commandInterface.command.toLowerCase()
+            if (command === 'gov.help gov.prs') {
                 UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov PRs Command')
                 return
             }
-            if (UI.projects.governance.spaces.reportsSpace.commandInterface.command.indexOf('Gov.PRs') !== 0 && UI.projects.governance.spaces.reportsSpace.commandInterface.command.indexOf('gov.prs') !== 0) { return 'Not PRs Commands' }
+            if (command.indexOf('gov.prs') !== 0) { return 'Not PRs Commands' }
 
             /* Set up the commit message */
-            let message = UI.projects.governance.spaces.reportsSpace.commandInterface.command.trim().substring(UI.projects.governance.spaces.reportsSpace.commandInterface.command.indexOf(' ') + 1, UI.projects.governance.spaces.reportsSpace.commandInterface.command.length)
+            let message = command.trim().substring(command.indexOf(' ') + 1, command.length)
             if (message.toLowerCase() === 'gov.prs') {
                 message = 'Automated PR merging process.'
             }
+
+            /* Closing the Governance Tab */
+            UI.projects.governance.spaces.reportsSpace.sidePanelTab.close()
+            UI.projects.education.spaces.docsSpace.sidePanelTab.open()
 
             /* Find the Username and Password */
             let apisNode = UI.projects.foundations.spaces.designSpace.workspace.getHierarchyHeadByNodeType('APIs')
@@ -60,70 +66,144 @@ function newGovernanceReportsCommmandInterface() {
                 return
             }
 
+            UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Message - Processing Pull Requests')
+
             message = message.replaceAll('#', '_HASHTAG_')
             message = message.replaceAll('/', '_SLASH_')
 
-            httpRequest(
-                undefined,
-                'Gov/PRs/' +
-                message + '/' +
-                config.username + '/' +
-                config.token + '/' +
-                UI.projects.education.spaces.docsSpace.currentBranch + '/' +
-                UI.projects.education.spaces.docsSpace.contributionsBranch
-                , onResponse)
+            /* Lets execute this command against the Client */
 
-            UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Message - Processing Pull Requests')
+            let params = {
+                method: 'mergePullRequests',
+                commitMessage: message,
+                username: config.username,
+                token: config.token
+            }
 
-            return
+            let url = 'GOV' // We will access the default Client GOV endpoint.
+
+            httpRequest(JSON.stringify(params), url, onResponse)
 
             function onResponse(err, data) {
+
                 /* Lets check the result of the call through the http interface */
-                data = JSON.parse(data)
-                if (err.result === GLOBAL.DEFAULT_OK_RESPONSE.result && data.result === GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                if (err.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call via HTTP Interface failed.' + err.stack)
+                    console.log('[ERROR] Params = ' + JSON.stringify(params))
+                    return
+                }
+
+                let response = JSON.parse(data)
+
+                /* Lets check the result of the method call */
+                if (response.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call to Client Github Server failed.' + err.stack)
+                    console.log('[ERROR] Params = ' + JSON.stringify(params))
+                }
+
+                /* Successful Call */
+
+                if (response.result === GLOBAL.DEFAULT_OK_RESPONSE.result) {
                     UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Message - Pull Requests Processed')
                 } else {
                     UI.projects.education.spaces.docsSpace.navigateTo(
-                        data.docs.project,
-                        data.docs.category,
-                        data.docs.type,
-                        data.docs.anchor,
+                        response.docs.project,
+                        response.docs.category,
+                        response.docs.type,
+                        response.docs.anchor,
                         undefined,
-                        data.docs.placeholder
+                        response.docs.placeholder
                     )
                 }
             }
         }
 
         function checkPayCommand() {
-            if (UI.projects.governance.spaces.reportsSpace.commandInterface.command.toLowerCase() === 'gov.help gov.pay') {
+
+            let command = UI.projects.governance.spaces.reportsSpace.commandInterface.command.toLowerCase()
+            if (command === 'gov.help gov.pay') {
                 UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Pay Command')
                 return
             }
-            if (UI.projects.governance.spaces.reportsSpace.commandInterface.command.indexOf('Gov.Pay') !== 0 && UI.projects.governance.spaces.reportsSpace.commandInterface.command.indexOf('gov.pay') !== 0) { return 'Not Pay Commands' }
+            if (command.indexOf('gov.pay') !== 0) { return 'Not Pay Commands' }
 
-            httpRequest(undefined, 'Gov/Pay/' + UI.projects.education.spaces.docsSpace.currentBranch, onResponse)
             UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Message - Paying to Contributors')
 
-            return
+            /*
+            Let's create a list of payments to be made.
+            */
+            let paymentsArray = []
+            /*
+            Here we get from the workspace all User Profiles.
+            */
+            let userProfiles = UI.projects.foundations.spaces.designSpace.workspace.getHierarchyHeadsByNodeType('User Profile')
+            /*
+            Transform the result array into table records.
+            */
+            for (let j = 0; j < userProfiles.length; j++) {
+                let userProfile = userProfiles[j]
+
+                if (userProfile.payload === undefined) { continue }
+                if (userProfile.tokensMined === undefined) { continue }
+                if (userProfile.tokensMined.payload === undefined) { continue }
+                if (userProfile.tokensMined.payload.tokensMined === undefined) { continue }
+
+                let payment = {
+                    "userProfile": userProfile.name,
+                    "from": UI.projects.governance.globals.saToken.SA_TOKEN_BSC_TREASURY_ACCOUNT_ADDRESS,
+                    "to": userProfile.payload.blockchainAccount,
+                    "amount": 1 * UI.projects.governance.globals.saToken.SA_TOKEN_BSC_DECIMAL_FACTOR //(userProfile.tokensMined.payload.tokensMined.total | 0) * UI.projects.governance.globals.saToken.SA_TOKEN_BSC_DECIMAL_FACTOR
+                }
+
+                paymentsArray.push(payment)
+            }
+            /* Let's get the Mnemonic */
+            let web3API = UI.projects.foundations.spaces.designSpace.workspace.getHierarchyHeadsByNodeType('APIs')[0].web3API
+            let mnemonic = UI.projects.foundations.utilities.nodeConfig.loadConfigProperty(web3API.payload, 'mnemonic')
+
+            /* Lets execute this command against the Client */
+
+            let params = {
+                method: 'payContributors',
+                contractAddress: UI.projects.governance.globals.saToken.SA_TOKEN_BSC_CONTRACT_ADDRESS,
+                contractAbi: UI.projects.governance.globals.saToken.SA_TOKEN_BSC_CONTRACT_ABI,
+                paymentsArray: paymentsArray,
+                mnemonic: mnemonic
+            }
+
+            let url = 'GOV' // We will access the default Client GOV endpoint.
+
+            httpRequest(JSON.stringify(params), url, onResponse)
 
             function onResponse(err, data) {
+
                 /* Lets check the result of the call through the http interface */
-                data = JSON.parse(data)
-                if (err.result === GLOBAL.DEFAULT_OK_RESPONSE.result && data.result === GLOBAL.CUSTOM_OK_RESPONSE.result) {
-                    if (data.message.summary.changes + data.message.summary.deletions + data.message.summary.insertions > 0) {
-                        UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Message - Pay Done')
-                    } else {
-                        UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Message - Pay Failed')
-                    }
+                if (err.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call via HTTP Interface failed.' + err.stack)
+                    console.log('[ERROR] Params = ' + JSON.stringify(params))
+                    return
+                }
+
+                let response = JSON.parse(data)
+
+                /* Lets check the result of the method call */
+                if (response.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call to Client Github Server failed.' + err.stack)
+                    console.log('[ERROR] Params = ' + JSON.stringify(params))
+                }
+
+                /* Successful Call */
+
+                if (response.result === GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    UI.projects.education.spaces.docsSpace.navigateTo('Governance', 'Topic', 'Gov Message - Contribution Payments Processed')
                 } else {
                     UI.projects.education.spaces.docsSpace.navigateTo(
-                        data.docs.project,
-                        data.docs.category,
-                        data.docs.type,
-                        data.docs.anchor,
+                        response.docs.project,
+                        response.docs.category,
+                        response.docs.type,
+                        response.docs.anchor,
                         undefined,
-                        data.docs.placeholder
+                        response.docs.placeholder
                     )
                 }
             }

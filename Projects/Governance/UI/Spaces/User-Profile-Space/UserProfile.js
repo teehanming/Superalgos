@@ -9,20 +9,15 @@ function newGovernanceUserProfileSpace() {
         physics: physics,
         draw: draw,
         getContainer: getContainer,
+        reset: reset,
         finalize: finalize,
         initialize: initialize
     }
 
-    thisObject.container = newContainer()
-    thisObject.container.initialize(MODULE_NAME)
-    thisObject.container.isDraggeable = false
-
     let waitingForResponses = 0
     let timer = 0
-
-    thisObject.githubStars = new Map()
-    thisObject.githubWatchers = new Map()
-    thisObject.githubForks = new Map()
+    const BSC_SCAN_RATE_LIMIT_DELAY = 7000
+    let reputationByAddress = new Map()
 
     return thisObject
 
@@ -32,116 +27,238 @@ function newGovernanceUserProfileSpace() {
         Superalgos Repository. This will later be used to know which user profiles are participating
         at the Github Program. 
         */
+        thisObject.githubStars = new Map()
+        thisObject.githubWatchers = new Map()
+        thisObject.githubForks = new Map()
 
+        thisObject.container = newContainer()
+        thisObject.container.initialize(MODULE_NAME)
+        thisObject.container.isDraggeable = false
         /*
         If the workspace is not related to governance, then we exit the Intialize Function
         */
-        let resultsArary = UI.projects.foundations.spaces.designSpace.workspace.getHierarchyHeadsByNodeType('User Profile')
-        if (resultsArary.length === 0) { return }
+        let userProfiles = UI.projects.foundations.spaces.designSpace.workspace.getHierarchyHeadsByNodeType('User Profile')
+        if (userProfiles.length === 0) { return }
+        /*
+        We are going to collapse all User Profiles to save processing resources at the UI
+        */
+        for (let i = 0; i < userProfiles.length; i++) {
+            let userProfile = userProfiles[i]
+            if (userProfile.payload.floatingObject.isCollapsed !== true) {
+                userProfile.payload.floatingObject.collapseToggle()
+            }
+        }
+        /*
+        Here we will setup the Reputation for each profile. 
+        */
+        timer = timer + BSC_SCAN_RATE_LIMIT_DELAY
+        waitingForResponses++
+        getTreasuryAccountTransactions()
 
-        /* Find the Username and Password */
+        function getTreasuryAccountTransactions() {
+            const url = "https://api.bscscan.com/api?module=account&action=tokentx&address=" + UI.projects.governance.globals.saToken.SA_TOKEN_BSC_TREASURY_ACCOUNT_ADDRESS + "&startblock=0"
+
+            fetch(url).then(function (response) {
+                return response.json();
+            }).then(function (data) {
+
+                let tokenTransfers = data.result
+                for (let i = 0; i < tokenTransfers.length; i++) {
+                    let transfer = tokenTransfers[i]
+
+                    if (transfer.contractAddress !== UI.projects.governance.globals.saToken.SA_TOKEN_BSC_CONTRACT_ADDRESS) { continue }
+                    if (transfer.from !== UI.projects.governance.globals.saToken.SA_TOKEN_BSC_TREASURY_ACCOUNT_ADDRESS) { continue }
+
+                    let currentReputation = Number(transfer.value) / UI.projects.governance.globals.saToken.SA_TOKEN_BSC_DECIMAL_FACTOR
+                    let previousReputation = reputationByAddress.get(transfer.to)
+                    let newReputation = previousReputation | 0 + currentReputation
+                    reputationByAddress.set(transfer.to, newReputation)
+                }
+                if (tokenTransfers.length > 9000) {
+                    console.log('[WARN] The total amount of BSC SA Token transfers is above 9000. After 10k this method will need pagination or otherwise users will not get their reputation calculated correctly.')
+                } else {
+                    console.log('[INFO] ' + tokenTransfers.length + ' reputation trasactions found at the blockchain. ')
+                }
+                waitingForResponses--
+            }).catch(function (err) {
+                const message = err.message + ' - ' + 'Can not access BSC SCAN servers.'
+                console.log(message)
+                waitingForResponses--
+            });
+        }
+
+        /* Find the Github Username and Token in order to activate the Github Program */
 
         let apisNode = UI.projects.foundations.spaces.designSpace.workspace.getHierarchyHeadByNodeType('APIs')
         if (apisNode === undefined) {
-            UI.projects.education.spaces.docsSpace.navigateTo('Foundations', 'Topic', 'App Error - Github Credentials Missing', 'Anchor Github Credentials Missing')
-            UI.projects.education.spaces.docsSpace.sidePanelTab.open()
+            console.log('[WARN] Github Program Disabled because the Github Credentials are not present at this workspace. APIs node not found.')
             return
         }
         if (apisNode.githubAPI === undefined) {
-            UI.projects.education.spaces.docsSpace.navigateTo('Foundations', 'Topic', 'App Error - Github Credentials Missing', 'Anchor Github Credentials Missing')
-            UI.projects.education.spaces.docsSpace.sidePanelTab.open()
+            console.log('[WARN] Github Program Disabled because the Github Credentials are not present at this workspace. Github API node not found.')
             return
         }
 
         let config = JSON.parse(apisNode.githubAPI.config)
         if (config.username === undefined || config.username === "") {
-            UI.projects.education.spaces.docsSpace.navigateTo('Foundations', 'Topic', 'App Error - Github Credentials Missing', 'Anchor Github Credentials Missing')
-            UI.projects.education.spaces.docsSpace.sidePanelTab.open()
+            console.log('[WARN] Github Program Disabled because the Github Credentials are not present at this workspace. Github Username not configured.')
             return
         }
         if (config.token === undefined || config.token === "") {
-            UI.projects.education.spaces.docsSpace.navigateTo('Foundations', 'Topic', 'App Error - Github Credentials Missing', 'Anchor Github Credentials Missing')
-            UI.projects.education.spaces.docsSpace.sidePanelTab.open()
+            console.log('[WARN] Github Program Disabled because the Github Credentials are not present at this workspace. Github Token not configured.')
             return
         }
-
-
-
+        /*
+        Here we will help setup the Github Programs...
+        */
         requestStars()
 
         function requestStars() {
-            httpRequest(
-                undefined,
-                'Gov/getGithubStars/' +
-                'Superalgos' + '/' +
-                config.username + '/' +
-                config.token
-                , onGithubStarsResponse)
+
+            let params = {
+                method: 'getGithubStars',
+                repository: 'Superalgos',
+                username: config.username,
+                token: config.token
+            }
+
+            let url = 'GOV' // We will access the default Client GOV endpoint.
+
+            httpRequest(JSON.stringify(params), url, onResponse)
+
+            function onResponse(err, data) {
+
+                /* Lets check the result of the call through the http interface */
+                if (err.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call via HTTP Interface failed. err.stack = ' + err.stack)
+                    console.log('[ERROR] params = ' + JSON.stringify(params))
+                    return
+                }
+
+                let response = JSON.parse(data)
+
+                /* Lets check the result of the method call */
+                if (response.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call to Client Github Server failed. err.stack = ' + err.stack)
+                    console.log('[ERROR] params = ' + JSON.stringify(params))
+                    console.log('[ERROR] response = ' + JSON.stringify(response))
+                    return
+                }
+
+                /* Successful Call */
+
+                let githubStarsArray = response.githubListArray
+
+                for (let i = 0; i < githubStarsArray.length; i++) {
+                    let githubUsername = githubStarsArray[i]
+                    thisObject.githubStars.set(githubUsername, 1)
+                }
+
+                requestWatchers()
+            }
         }
 
         function requestWatchers() {
-            httpRequest(
-                undefined,
-                'Gov/getGithubWatchers/' +
-                'Superalgos' + '/' +
-                config.username + '/' +
-                config.token
-                , onGithubWatchersResponse)
+
+            let params = {
+                method: 'getGithubWatchers',
+                repository: 'Superalgos',
+                username: config.username,
+                token: config.token
+            }
+
+            let url = 'GOV' // We will access the default Client GOV endpoint.
+
+            httpRequest(JSON.stringify(params), url, onResponse)
+
+            function onResponse(err, data) {
+
+                /* Lets check the result of the call through the http interface */
+                if (err.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call via HTTP Interface failed. err.stack = ' + err.stack)
+                    console.log('[ERROR] params = ' + JSON.stringify(params))
+                    return
+                }
+
+                let response = JSON.parse(data)
+
+                /* Lets check the result of the method call */
+                if (response.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call to Client Github Server failed. err.stack = ' + err.stack)
+                    console.log('[ERROR] params = ' + JSON.stringify(params))
+                    console.log('[ERROR] response = ' + JSON.stringify(response))
+                    return
+                }
+
+                /* Successful Call */
+
+                let githubWatchersArray = response.githubListArray
+
+                for (let i = 0; i < githubWatchersArray.length; i++) {
+                    let githubUsername = githubWatchersArray[i]
+                    thisObject.githubWatchers.set(githubUsername, 1)
+                }
+
+                requestForks()
+            }
         }
 
         function requestForks() {
-            httpRequest(
-                undefined,
-                'Gov/getGithubForks/' +
-                'Superalgos' + '/' +
-                config.username + '/' +
-                config.token
-                , onGithubForksResponse)
-        }
 
-        function onGithubStarsResponse(err, githubData) {
-            //console.log(githubData)
-            /* Lets check the result of the call through the http interface */
-            let githubStarsArray = JSON.parse(githubData)
-
-            for (let i = 0; i < githubStarsArray.length; i++) {
-                let githubUsername = githubStarsArray[i]
-                thisObject.githubStars.set(githubUsername, 1)
+            let params = {
+                method: 'getGithubForks',
+                repository: 'Superalgos',
+                username: config.username,
+                token: config.token
             }
 
-            requestWatchers()
-        }
+            let url = 'GOV' // We will access the default Client GOV endpoint.
 
-        function onGithubWatchersResponse(err, githubData) {
-            //console.log(githubData)
-            /* Lets check the result of the call through the http interface */
-            let githubWatchersArray = JSON.parse(githubData)
+            httpRequest(JSON.stringify(params), url, onResponse)
 
-            for (let i = 0; i < githubWatchersArray.length; i++) {
-                let githubUsername = githubWatchersArray[i]
-                thisObject.githubWatchers.set(githubUsername, 1)
-            }
+            function onResponse(err, data) {
 
-            requestForks()
-        }
+                /* Lets check the result of the call through the http interface */
+                if (err.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call via HTTP Interface failed. err.stack = ' + err.stack)
+                    console.log('[ERROR] params = ' + JSON.stringify(params))
+                    return
+                }
 
-        function onGithubForksResponse(err, githubData) {
-            //console.log(githubData)
-            /* Lets check the result of the call through the http interface */
-            let githubForksArray = JSON.parse(githubData)
+                let response = JSON.parse(data)
 
-            for (let i = 0; i < githubForksArray.length; i++) {
-                let githubUsername = githubForksArray[i]
-                thisObject.githubForks.set(githubUsername, 1)
+                /* Lets check the result of the method call */
+                if (response.result !== GLOBAL.DEFAULT_OK_RESPONSE.result) {
+                    console.log('[ERROR] Call to Client Github Server failed. err.stack = ' + err.stack)
+                    console.log('[ERROR] params = ' + JSON.stringify(params))
+                    console.log('[ERROR] response = ' + JSON.stringify(response))
+                    return
+                }
+
+                /* Successful Call */
+
+                let githubForksArray = response.githubListArray
+
+                for (let i = 0; i < githubForksArray.length; i++) {
+                    let githubUsername = githubForksArray[i]
+                    thisObject.githubForks.set(githubUsername, 1)
+                }
             }
         }
     }
 
     function finalize() {
         thisObject.githubStars = undefined
+        thisObject.githubWatchers = undefined
+        thisObject.githubForks = undefined
 
         thisObject.container.finalize()
         thisObject.container = undefined
+    }
+
+    function reset() {
+        finalize()
+        initialize()
     }
 
     function getContainer(point) {
@@ -221,14 +338,14 @@ function newGovernanceUserProfileSpace() {
                     waitingForResponses++
                     userProfile.payload.blockchainTokens = 0 // We need to set this value here so that the next call to BSCSCAN is not done more than once.
                     setTimeout(getBlockchainTokens, timer, userProfile, blockchainAccount)
-                    timer = timer + 6000
+                    timer = timer + BSC_SCAN_RATE_LIMIT_DELAY
                 }
             }
         }
 
         function getBlockchainTokens(userProfile, blockchainAccount) {
             console.log('blockchainAccount ', blockchainAccount)
-            const url = "https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0xfb981ed9a92377ca4d75d924b9ca06df163924fd&address=" + blockchainAccount + "&tag=latest&apikey=YourApiKeyToken"
+            const url = "https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=" + UI.projects.governance.globals.saToken.SA_TOKEN_BSC_CONTRACT_ADDRESS + "&address=" + blockchainAccount + "&tag=latest&apikey=YourApiKeyToken"
 
             fetch(url).then(function (response) {
                 return response.json();
@@ -236,6 +353,7 @@ function newGovernanceUserProfileSpace() {
                 console.log(data)
                 userProfile.payload.uiObject.setInfoMessage(data)
                 userProfile.payload.blockchainTokens = Number(data.result) / 1000000000000000000
+                userProfile.payload.reputation = Math.min(reputationByAddress.get(blockchainAccount.toLowerCase()) | 0, userProfile.payload.blockchainTokens)
                 waitingForResponses--
             }).catch(function (err) {
                 const message = err.message + ' - ' + 'Can not access BSC SCAN servers.'

@@ -6,7 +6,7 @@
         "text": "Let's talk about my friend, the search box in the Docs. She has a bit of a double life: she searches, but also commands!",
         "updated": 1616756994691,
         "icon": {
-            "name": "strategy-manage-stage",
+            "name": "Strategy\\strategy-manage-stage",
             "project": "Foundations"
         },
         "translations": [
@@ -14,6 +14,12 @@
                 "language": "IT",
                 "text": "Ora ti parlo della mia amica, la barra di ricerca nei Docs. Diciamo che ha una doppia vita: non solo cerca, ma comanda pure! ",
                 "updated": 1619631665874,
+                "style": "Definition"
+            },
+            {
+                "language": "ES",
+                "text": "Hablemos de mi amigo, el cuadro de búsqueda en Documentos. Tiene una doble vida: busca, ¡pero también manda!",
+                "updated": 1628112617535,
                 "style": "Definition"
             }
         ]
@@ -29,6 +35,12 @@
                     "text": "Quello che voglio dire è che la barra di ricerca è anche una riga di comando! La lista di comandi riguarda:",
                     "updated": 1619631729737,
                     "style": "Text"
+                },
+                {
+                    "language": "ES",
+                    "text": "El cuadro de búsqueda también es interfaz de línea de comandos! La lista de comandos tiene que ver con:",
+                    "updated": 1628113873377,
+                    "style": "Text"
                 }
             ]
         },
@@ -42,12 +54,26 @@
                     "text": "Produzione e modifica della documentazione",
                     "updated": 1619631754180,
                     "style": "List"
+                },
+                {
+                    "language": "ES",
+                    "text": "Producir y editar los documentos.",
+                    "updated": 1628113477717,
+                    "style": "List"
                 }
             ]
         },
         {
             "style": "List",
-            "text": "Getting updates."
+            "text": "Getting updates.",
+            "translations": [
+                {
+                    "language": "ES",
+                    "text": "Obteniendo actualizaciones.",
+                    "updated": 1628113492383,
+                    "style": "List"
+                }
+            ]
         },
         {
             "style": "List",
@@ -58,6 +84,12 @@
                     "language": "IT",
                     "text": "Aggiungere il proprio contributo al progetto",
                     "updated": 1619631772476,
+                    "style": "List"
+                },
+                {
+                    "language": "ES",
+                    "text": "Contribuir con trabajo al proyecto.",
+                    "updated": 1628113514180,
                     "style": "List"
                 }
             ]
@@ -72,6 +104,12 @@
                     "text": "Lavoreremo su un esempio pratico che riguarda entrambe le cose! Ti insegnerò come modificare i docs e contribuire, usando un paio di comandi!",
                     "updated": 1619631824997,
                     "style": "Callout"
+                },
+                {
+                    "language": "ES",
+                    "text": "¡Trabajemos en un ejemplo práctico! ¡Te enseñaré cómo editar los documentos y cómo contribuir con un par de comandos!",
+                    "updated": 1628113897204,
+                    "style": "Callout"
                 }
             ]
         },
@@ -84,6 +122,12 @@
                     "language": "IT",
                     "text": "Presenterò i prossimi step con una breve storia...spero ti piaccia l'idea!",
                     "updated": 1619631849733,
+                    "style": "Text"
+                },
+                {
+                    "language": "ES",
+                    "text": "Prepararé los siguientes pasos con una pequeña historia ... ¡Espero que les guste la idea!",
+                    "updated": 1628113581278,
                     "style": "Text"
                 }
             ]

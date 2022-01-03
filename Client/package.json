@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^18.12.0",
-    "ccxt": "^1.66.20",
+    "ccxt": "^1.66.21",
     "child_process": "^1.0.2",
     "ethereumjs-common": "^1.5.2",
     "ethereumjs-tx": "^2.1.2",

@@ -12,7 +12,7 @@
     "child_process": "^1.0.2",
     "ethereumjs-common": "^1.5.2",
     "ethereumjs-tx": "^2.1.2",
-    "ethers": "^5.4.7",
+    "ethers": "^5.5.2",
     "lookpath": "^1.2.2",
     "node-fetch": "3.1.0",
     "open": "^8.2.1",

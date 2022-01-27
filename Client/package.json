@@ -1,0 +1,24 @@
+{
+  "name": "client",
+  "version": "0.0.6",
+  "description": "BackendServer",
+  "main": "client.js",
+  "author": {
+    "name": "Luis-Fernando-Molina"
+  },
+  "dependencies": {
+    "@octokit/rest": "^18.12.0",
+    "ccxt": "^1.66.21",
+    "child_process": "^1.0.2",
+    "ethereumjs-common": "^1.5.2",
+    "ethereumjs-tx": "^2.1.2",
+    "ethers": "^5.5.2",
+    "lookpath": "^1.2.2",
+    "node-fetch": "3.1.0",
+    "open": "^8.4.0",
+    "rimraf": "^3.0.2",
+    "simple-git": "^2.48.0",
+    "web3": "^1.5.3",
+    "ws": "^8.4.0"
+  }
+}
